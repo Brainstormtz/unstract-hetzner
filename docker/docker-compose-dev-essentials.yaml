@@ -66,30 +66,18 @@ services:
     image: traefik:v2.10
     container_name: unstract-proxy
     restart: unless-stopped
-    # - Enables the web UI.
-    # - Tells Traefik to use docker and file providers.
-    # - Direct Traefik to the correct network for docker provider.
-    #   This is required because Traefik by default tries available networks in a
-    #   round-robin fashion. With multiple providers, services can be on multiple
-    #   networks causing 504 Gateway Timeout.
     command:
       --api.insecure=true
       --accesslog=true --log.level=INFO
       --providers.docker=true --providers.docker.network=unstract-network
       --providers.file.filename=/proxy_overrides.yaml --providers.file.watch=true
     ports:
-      # The HTTP port
-      - "80:80"
-      # The Web UI (enabled by --api.insecure=true)
-      - "8080:8080"
+      - "80:80"  # Ensure this is accessible
+      - "8080:8080"  # Web UI
     volumes:
-      # So that Traefik can listen to the Docker events
       - /var/run/docker.sock:/var/run/docker.sock
-      # Proxy overrides for components run directly in Docker host
       - ./proxy_overrides.yaml:/proxy_overrides.yaml
-    # Since any proxy overrides need to point to Docker host for relevant routes.
     extra_hosts:
-      # "host-gateway" is a special string that translates to host docker0 i/f IP.
       - "host.docker.internal:host-gateway"
 
   feature-flag:
