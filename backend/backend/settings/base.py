@@ -269,8 +269,7 @@ DEFAULT_MODEL_BACKEND = "django.contrib.auth.backends.ModelBackend"
 GOOGLE_MODEL_BACKEND = "social_core.backends.google.GoogleOAuth2"
 
 AUTHENTICATION_BACKENDS = (
-    DEFAULT_MODEL_BACKEND,
-    GOOGLE_MODEL_BACKEND,
+    'django.contrib.auth.backends.ModelBackend',
 )
 
 PUBLIC_ORG_ID = "public"
