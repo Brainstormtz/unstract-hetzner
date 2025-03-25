@@ -66,6 +66,8 @@ services:
     image: traefik:v2.10
     container_name: unstract-proxy
     restart: unless-stopped
+    networks:
+      - unstract-network
     command:
       --api.insecure=true
       --accesslog=true --log.level=INFO
