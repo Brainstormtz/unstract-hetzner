@@ -158,7 +158,11 @@ class AuthenticationService:
         if self._set_default_user():
             user = authenticate(request, username=username, password=password)
             if user:
+                logger.info(f"User {username} authenticated successfully")
                 login(request, user)
+                logger.info(f"User {username} logged in successfully")
+                UserSessionUtils.set_organization_id(request, DefaultOrg.ORGANIZATION_NAME)
+                logger.info(f"Organization ID set to {DefaultOrg.ORGANIZATION_NAME} in session")
                 return True
         return False
 
