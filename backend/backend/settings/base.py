@@ -153,11 +153,18 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 CSRF_TRUSTED_ORIGINS = [
-    WEB_APP_ORIGIN_URL,
-    f"https://{WEB_APP_ORIGIN_URL.split('://')[-1]}",  # Include HTTPS version
-    f"http://{WEB_APP_ORIGIN_URL.split('://')[-1]}"   # Include HTTP version
+    "http://unstract.brainstormit.tech",
+    "https://unstract.brainstormit.tech",
+    "http://localhost:3000",
+    "https://localhost:3000"
 ]
-CORS_ALLOW_ALL_ORIGINS = False
+CORS_ALLOWED_ORIGINS = [
+    "http://unstract.brainstormit.tech",
+    "https://unstract.brainstormit.tech",
+    "http://localhost:3000",
+    "https://localhost:3000"
+]
+CORS_ALLOW_CREDENTIALS = True
 
 LOGGING = {
     "version": 1,
