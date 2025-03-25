@@ -19,7 +19,14 @@ class AuthService(ABC):
         self.authHelper: AuthHelper = AuthHelper()
 
     def user_login(self, request: Request, region: Region) -> Any:
-        raise MethodNotImplemented()
+        from django.contrib.auth import authenticate, login
+        username = request.data.get('username')
+        password = request.data.get('password')
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            return {'status': 'success', 'user': user.username}
+        return {'status': 'error', 'message': 'Invalid credentials'}
 
     def user_signup(self, request: Request, region: Region) -> Any:
         raise MethodNotImplemented()
