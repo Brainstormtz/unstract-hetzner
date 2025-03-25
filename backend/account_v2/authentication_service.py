@@ -37,6 +37,19 @@ class AuthenticationService:
         self.authentication_helper = AuthenticationHelper()
         self.default_organization: Organization = self.user_organization()
 
+    def _validate_password_complexity(self, password: str) -> None:
+        """Validate password meets complexity requirements."""
+        if len(password) < 12:
+            raise ValueError("Password must be at least 12 characters long")
+        if not re.search(r'[A-Z]', password):
+            raise ValueError("Password must contain uppercase letters")
+        if not re.search(r'[a-z]', password):
+            raise ValueError("Password must contain lowercase letters")
+        if not re.search(r'[0-9]', password):
+            raise ValueError("Password must contain numbers")
+        if not re.search(r'[^A-Za-z0-9]', password):
+            raise ValueError("Password must contain special characters")
+
     def user_login(self, request: Request) -> Any:
         """Authenticate and log in a user.
 
@@ -49,21 +62,36 @@ class AuthenticationService:
         Raises:
             ValueError: If there is an error in the login credentials.
         """
+        # Check for rate limiting
+        ip = self._get_client_ip(request)
+        if self._is_rate_limited(ip):
+            return self.render_login_page_with_error(
+                request, "Too many login attempts. Please try again later."
+            )
+
         if request.method == "GET":
             return self.render_login_page(request)
         try:
             validated_data = self.validate_login_credentials(request)
             username = validated_data.get("username")
             password = validated_data.get("password")
+            
+            # Validate password complexity
+            self._validate_password_complexity(password)
+            
         except ValueError as e:
+            self._increment_login_attempt(ip)
             return render(
                 request,
                 UserLoginTemplate.TEMPLATE,
                 {UserLoginTemplate.ERROR_PLACE_HOLDER: str(e)},
             )
+            
         if self.authenticate_and_login(request, username, password):
+            self._reset_login_attempts(ip)
             return redirect(settings.WEB_APP_ORIGIN_URL)
 
+        self._increment_login_attempt(ip)
         return self.render_login_page_with_error(request, ErrorMessage.USER_LOGIN_ERROR)
 
     def is_authenticated(self, request: HttpRequest) -> bool:
@@ -76,6 +104,29 @@ class AuthenticationService:
             bool: True if the user is authenticated, False otherwise.
         """
         return request.user.is_authenticated
+
+    def __init__(self) -> None:
+        self.authentication_helper = AuthenticationHelper()
+        self.default_organization: Organization = self.user_organization()
+        self.login_attempts = {}  # Track login attempts for rate limiting
+
+    def _get_client_ip(self, request: Request) -> str:
+        """Get client IP address for rate limiting."""
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        return x_forwarded_for.split(',')[0] if x_forwarded_for else request.META.get('REMOTE_ADDR')
+
+    def _is_rate_limited(self, ip: str) -> bool:
+        """Check if IP is rate limited."""
+        return self.login_attempts.get(ip, 0) >= 5  # Allow 5 attempts
+
+    def _increment_login_attempt(self, ip: str) -> None:
+        """Increment login attempt counter for IP."""
+        self.login_attempts[ip] = self.login_attempts.get(ip, 0) + 1
+
+    def _reset_login_attempts(self, ip: str) -> None:
+        """Reset login attempts for IP."""
+        if ip in self.login_attempts:
+            del self.login_attempts[ip]
 
     def authenticate_and_login(
         self, request: Request, username: str, password: str
@@ -91,13 +142,6 @@ class AuthenticationService:
             bool: True if the user is successfully authenticated and logged in,
                 False otherwise.
         """
-        # Validation of user credentials
-        if (
-            username != DefaultOrg.MOCK_USER
-            or password != DefaultOrg.MOCK_USER_PASSWORD
-        ):
-            return False
-
         user = authenticate(request, username=username, password=password)
         if user:
             # To avoid conflicts with django superuser
@@ -344,9 +388,17 @@ class AuthenticationService:
         Returns:
             User: The created or existing mock user
         """
-        user, created = User.objects.get_or_create(username=DefaultOrg.MOCK_USER)
+        # Generate secure random credentials for mock user
+        mock_username = f"mock_{uuid.uuid4().hex[:8]}"
+        mock_password = uuid.uuid4().hex  # Temporary password that must be changed
+        
+        user, created = User.objects.get_or_create(username=mock_username)
         if created:
-            logger.info(f"Created new user with username {DefaultOrg.MOCK_USER}")
+            user.user_id = str(uuid.uuid4())
+            user.email = f"{mock_username}@example.com"
+            user.password = make_password(mock_password)
+            user.save()
+            logger.info(f"Created new mock user with username {mock_username}")
         return user
 
     def _get_or_create_organization_user(self) -> User:
@@ -394,17 +446,22 @@ class AuthenticationService:
         return first_member
 
     def _update_user_credentials(self, user: User) -> None:
-        """Update user with default credentials.
+        """Update user with secure credentials.
 
         Args:
             user (User): The user to update
         """
-        user.username = DefaultOrg.MOCK_USER
-        user.user_id = DefaultOrg.MOCK_USER_ID
-        user.email = DefaultOrg.MOCK_USER_EMAIL
-        user.password = make_password(DefaultOrg.MOCK_USER_PASSWORD)
-        user.save()
-        logger.info(f"Updated user {user} with username {DefaultOrg.MOCK_USER}")
+        # Only update if using default insecure credentials
+        if (user.username == DefaultOrg.MOCK_USER or
+            user.email == DefaultOrg.MOCK_USER_EMAIL):
+            new_username = f"user_{uuid.uuid4().hex[:8]}"
+            new_password = uuid.uuid4().hex  # Temporary password
+            
+            user.username = new_username
+            user.email = f"{new_username}@example.com"
+            user.password = make_password(new_password)
+            user.save()
+            logger.info(f"Updated user credentials to secure values")
 
     def get_user_info(self, request: Request) -> Optional[UserInfo]:
         user: User = request.user
