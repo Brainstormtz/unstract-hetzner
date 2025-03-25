@@ -131,3 +131,7 @@ volumes:
   postgres_data:
   qdrant_data:
   redis_data:
+
+networks:
+  unstract-network:
+    name: unstract-network
