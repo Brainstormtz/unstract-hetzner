@@ -48,6 +48,7 @@ services:
       - redis
     environment:
       - ENVIRONMENT=development
+      - CELERY_BROKER_URL=redis://unstract-redis:6379
       - APPLICATION_NAME=unstract-worker
     labels:
       - traefik.enable=false
@@ -69,6 +70,7 @@ services:
       - redis
     environment:
       - ENVIRONMENT=development
+      - CELERY_BROKER_URL=redis://unstract-redis:6379
       - APPLICATION_NAME=unstract-worker-logging
     labels:
       - traefik.enable=false
@@ -86,6 +88,7 @@ services:
       - redis
     environment:
       - ENVIRONMENT=development
+      - CELERY_BROKER_URL=redis://unstract-redis:6379
       - APPLICATION_NAME=unstract-worker-api-deployment
     labels:
       - traefik.enable=false
