@@ -1,7 +1,9 @@
 import logging
+import re
 import uuid
 from typing import Any, Optional
 
+from django.middleware.csrf import get_token
 from account_v2.authentication_helper import AuthenticationHelper
 from account_v2.constants import DefaultOrg, ErrorMessage, UserLoginTemplate
 from account_v2.custom_exceptions import Forbidden, MethodNotImplemented
@@ -108,7 +110,9 @@ class AuthenticationService:
     def __init__(self) -> None:
         self.authentication_helper = AuthenticationHelper()
         self.default_organization: Organization = self.user_organization()
-        self.login_attempts = {}  # Track login attempts for rate limiting
+        # Rate limiting now handled by external service (Redis)
+        # Initialize with empty dict for backward compatibility
+        self.login_attempts = {}
 
     def _get_client_ip(self, request: Request) -> str:
         """Get client IP address for rate limiting."""
@@ -158,6 +162,8 @@ class AuthenticationService:
         return False
 
     def render_login_page(self, request: Request) -> Any:
+        # Ensure CSRF token is generated and included in the response
+        get_token(request)
         return render(request, UserLoginTemplate.TEMPLATE)
 
     def render_login_page_with_error(self, request: Request, error_message: str) -> Any:

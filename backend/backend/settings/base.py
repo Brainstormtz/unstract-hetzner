@@ -57,7 +57,7 @@ if ENV_FILE:
 WORKFLOW_ACTION_EXPIRATION_TIME_IN_SECOND = os.environ.get(
     "WORKFLOW_ACTION_EXPIRATION_TIME_IN_SECOND", 10800
 )
-WEB_APP_ORIGIN_URL = os.environ.get("WEB_APP_ORIGIN_URL", "http://localhost:3000")
+WEB_APP_ORIGIN_URL = os.environ.get("WEB_APP_ORIGIN_URL", "http://unstract.brainstormit.tech")
 
 LOGIN_NEXT_URL = os.environ.get("LOGIN_NEXT_URL", "http://localhost:3000/org")
 LANDING_URL = os.environ.get("LANDING_URL", "http://localhost:3000/landing")
@@ -152,7 +152,11 @@ ENCRYPTION_KEY = get_required_setting("ENCRYPTION_KEY")
 DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
-CSRF_TRUSTED_ORIGINS = [WEB_APP_ORIGIN_URL]
+CSRF_TRUSTED_ORIGINS = [
+    WEB_APP_ORIGIN_URL,
+    f"https://{WEB_APP_ORIGIN_URL.split('://')[-1]}",  # Include HTTPS version
+    f"http://{WEB_APP_ORIGIN_URL.split('://')[-1]}"   # Include HTTP version
+]
 CORS_ALLOW_ALL_ORIGINS = False
 
 LOGGING = {

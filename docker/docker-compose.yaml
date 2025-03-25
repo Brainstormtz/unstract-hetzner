@@ -30,7 +30,7 @@ services:
       - APPLICATION_NAME=unstract-backend
     labels:
       - traefik.enable=true
-      - traefik.http.routers.backend.rule=Host(`frontend.unstract.localhost`) && PathPrefix(`/api/v1`, `/deployment`)
+      - traefik.http.routers.backend.rule=Host(`unstract.brainstormit.tech`) && PathPrefix(`/api/v1`, `/deployment`)
     extra_hosts:
       # "host-gateway" is a special string that translates to host docker0 i/f IP.
       - "host.docker.internal:host-gateway"

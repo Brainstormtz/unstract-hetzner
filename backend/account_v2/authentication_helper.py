@@ -92,13 +92,17 @@ class AuthenticationHelper:
         Parameters:
             user_pks (list[str]): The primary keys of the users to remove.
         """
-        # removing user from organization
-        OrganizationMemberService.remove_users_by_user_pks(user_pks)
-        # removing user m2m relations , while removing user
-        for user_pk in user_pks:
-            User.objects.get(pk=user_pk).prompt_registries.clear()
-            User.objects.get(pk=user_pk).shared_custom_tools.clear()
-            User.objects.get(pk=user_pk).shared_adapters_instance.clear()
+        from django.db import transaction
+        
+        with transaction.atomic():
+            # removing user from organization
+            OrganizationMemberService.remove_users_by_user_pks(user_pks)
+            # removing user m2m relations , while removing user
+            for user_pk in user_pks:
+                user = User.objects.select_for_update().get(pk=user_pk)
+                user.prompt_registries.clear()
+                user.shared_custom_tools.clear()
+                user.shared_adapters_instance.clear()
 
     @staticmethod
     def remove_user_from_organization_by_user_id(

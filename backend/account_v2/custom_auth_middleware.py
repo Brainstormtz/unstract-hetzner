@@ -22,10 +22,11 @@ class CustomAuthMiddleware:
 
         # Authenticating With API_KEY
         x_api_key = request.headers.get(RequestHeader.X_API_KEY)
-        if (
-            settings.INTERNAL_SERVICE_API_KEY
-            and x_api_key == settings.INTERNAL_SERVICE_API_KEY
-        ):  # Should API Key be in settings or just env alone?
+        if settings.INTERNAL_SERVICE_API_KEY:
+            # Use constant-time comparison to prevent timing attacks
+            from django.utils.crypto import constant_time_compare
+            if constant_time_compare(x_api_key or '', settings.INTERNAL_SERVICE_API_KEY):
+                return self.get_response(request)
             return self.get_response(request)
 
         if AuthenticationPluginRegistry.is_plugin_available():
