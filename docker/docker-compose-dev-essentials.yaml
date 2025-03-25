@@ -67,11 +67,11 @@ services:
     container_name: unstract-proxy
     restart: unless-stopped
     networks:
-      - unstract-network
+      - bridge
     command:
       --api.insecure=true
       --accesslog=true --log.level=INFO
-      --providers.docker=true --providers.docker.network=unstract-network
+      --providers.docker=true --providers.docker.network=bridge
       --providers.file.filename=/proxy_overrides.yaml --providers.file.watch=true
     ports:
       - "80:80"  # Ensure this is accessible
