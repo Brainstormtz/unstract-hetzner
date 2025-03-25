@@ -4,5 +4,5 @@ metadata = {
     "name": "sample_auth",
     "service_class": AuthService,
     "description": "Sample Authentication Method",
-    "is_active": False,
+    "is_active": True,
 }
