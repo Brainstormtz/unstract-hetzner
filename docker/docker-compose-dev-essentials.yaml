@@ -133,5 +133,5 @@ volumes:
   redis_data:
 
 networks:
-  unstract-network:
-    name: unstract-network
+  bridge:
+    driver: bridge

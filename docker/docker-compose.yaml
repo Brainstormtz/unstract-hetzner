@@ -153,9 +153,9 @@ services:
       - ENVIRONMENT=development
     labels:
       - traefik.enable=true
+      - traefik.http.routers.frontend.rule=Host(`unstract.brainstormit.tech`)  && !PathPrefix(`/api/v1`, `/deployment`)
     networks:
       - bridge
-    - traefik.http.routers.frontend.rule=Host(`unstract.brainstormit.tech`)  && !PathPrefix(`/api/v1`, `/deployment`)
 
   platform-service:
     image: unstract/platform-service:${VERSION}
