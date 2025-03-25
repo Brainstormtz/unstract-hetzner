@@ -53,6 +53,15 @@ function Settings() {
             <Typography.Link
               className="settings-plt-typo"
               strong
+              onClick={() => navigate("credentials")}
+            >
+              Default Credentials
+            </Typography.Link>
+          </div>
+          <div className="settings-plt">
+            <Typography.Link
+              className="settings-plt-typo"
+              strong
               onClick={handleDefaultTriadClick}
             >
               Default Triad

@@ -1,4 +1,5 @@
 import logging
+import os
 import re
 import uuid
 from typing import Any, Optional
@@ -366,7 +367,20 @@ class AuthenticationService:
             organization = UserContext.get_organization()
 
             user = self._get_or_create_user(organization)
-            self._update_user_credentials(user)
+            
+            # Check if default credentials are set in environment variables
+            default_username = os.environ.get('DEFAULT_AUTH_USERNAME')
+            default_password = os.environ.get('DEFAULT_AUTH_PASSWORD')
+            
+            if default_username and default_password:
+                # Update user with default credentials from environment variables
+                user.username = default_username
+                user.set_password(default_password)
+                user.save()
+                logger.info(f"Updated user with default credentials from environment variables")
+            else:
+                # Fall back to generating random credentials
+                self._update_user_credentials(user)
 
             return True
 

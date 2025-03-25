@@ -157,3 +157,29 @@ class UpdateFlagSerializer(ModelSerializer):
     class Meta:
         model = OrganizationMember
         fields = ("is_login_onboarding_msg", "is_prompt_studio_onboarding_msg")
+
+
+class CredentialsSerializer(serializers.Serializer):
+    username = serializers.CharField(required=True)
+    password = serializers.CharField(required=True)
+    
+    def validate_password(self, value):
+        """
+        Validate that the password meets complexity requirements.
+        """
+        if len(value) < 8:
+            raise serializers.ValidationError("Password must be at least 8 characters long")
+        
+        # Check for at least one uppercase letter, one lowercase letter, one digit, and one special character
+        has_uppercase = any(c.isupper() for c in value)
+        has_lowercase = any(c.islower() for c in value)
+        has_digit = any(c.isdigit() for c in value)
+        has_special = any(not c.isalnum() for c in value)
+        
+        if not (has_uppercase and has_lowercase and has_digit and has_special):
+            raise serializers.ValidationError(
+                "Password must contain at least one uppercase letter, one lowercase letter, "
+                "one digit, and one special character"
+            )
+        
+        return value

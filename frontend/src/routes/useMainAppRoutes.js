@@ -9,6 +9,7 @@ import { RequireAdmin } from "../components/helpers/auth/RequireAdmin.js";
 import { UsersPage } from "../pages/UsersPage.jsx";
 import { InviteEditUserPage } from "../pages/InviteEditUserPage.jsx";
 import { DefaultTriad } from "../components/settings/default-triad/DefaultTriad.jsx";
+import { DefaultCredentialsPage } from "../pages/DefaultCredentialsPage.jsx";
 import { PageLayout } from "../layouts/page-layout/PageLayout.jsx";
 import { ProfilePage } from "../pages/ProfilePage.jsx";
 import { DeploymentsPage } from "../pages/DeploymentsPage.jsx";
@@ -167,6 +168,7 @@ function useMainAppRoutes() {
           <Route path="users" element={<UsersPage />} />
           <Route path="users/invite" element={<InviteEditUserPage />} />
           <Route path="users/edit" element={<InviteEditUserPage />} />
+          <Route path="settings/credentials" element={<DefaultCredentialsPage />} />
         </Route>
         <Route path="settings/triad" element={<DefaultTriad />} />
         {RequirePlatformAdmin && PlatformAdminPage && (

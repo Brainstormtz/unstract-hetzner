@@ -203,6 +203,13 @@ function Users() {
           Invite User
         </CustomButton>
         <Button
+          type="primary"
+          onClick={() => navigate(`/${sessionDetails?.orgName}/settings/credentials`)}
+          style={{ marginLeft: '8px' }}
+        >
+          Manage Credentials
+        </Button>
+        <Button
           shape="circle"
           icon={<ReloadOutlined />}
           onClick={getAllUsers}
