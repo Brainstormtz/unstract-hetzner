@@ -251,6 +251,11 @@ build_services() {
     }
   elif [ "$first_setup" = true ] || [ "$opt_update" = true ]; then
     echo -e "$blue_text""Pulling""$default_text"" docker images tag ""$blue_text""$opt_version""$default_text""."
+    echo "Checking Docker Compose version..."
+    docker compose version
+    echo "Checking Docker status..."
+    docker info
+    echo "TOOL_REGISTRY_CONFIG_SRC_PATH: ${TOOL_REGISTRY_CONFIG_SRC_PATH}"
     # Try again on a slow network.
     VERSION=$opt_version $docker_compose_cmd -f "$script_dir/docker/docker-compose.yaml" pull ||
     VERSION=$opt_version $docker_compose_cmd -f "$script_dir/docker/docker-compose.yaml" pull || {
